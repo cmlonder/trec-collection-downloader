@@ -1,4 +1,4 @@
-# TREC 2011 Collection Downloader
+# TREC 2011 Twitter Collection Downloader
 
 * Downloads approximately 16 million tweets which are gathered by TREC in 2011. 
 * Enables download from multiple machine and save your time (in a single machine, it may last +30 days!)
