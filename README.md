@@ -13,6 +13,7 @@ http://trec.nist.gov/data/tweets/
 * Python 3.5.*
 * Download https://github.com/lintool/twitter-tools to your local, lets call it PATH for your later usage in this guide
 * URL, username and password which is obtained via http://trec.nist.gov/data/tweets/ Pay attention to this section in the link:
+
 > Email the signed agreement, as a PDF file, to Angela Ellis <angela.ellis@nist.gov>. In the body of your email,
 > Be clear that you are requesting the Tweets2011 dataset
 > Include your name,
