@@ -4,6 +4,8 @@
 * Enables download from multiple machine and save your time (in a single machine, it may last +30 days!)
 * Retry failed downloads
 * Write downloads into log file
+* Combines all failed/succeed download statistics
+* Uncompress all zips into one folder
 
 For more information about collection https://github.com/lintool/twitter-tools/wiki/Tweets2011-Collection and TREC 
 http://trec.nist.gov/data/tweets/
@@ -11,7 +13,7 @@ http://trec.nist.gov/data/tweets/
 ## Prerequests
 
 * Python 3.5.*
-* Download https://github.com/lintool/twitter-tools to your local, lets call it PATH for your later usage in this guide
+* Download https://github.com/lintool/twitter-tools to your local, lets call it PATH for your later usage in this guide. This is main tool to fetch the tweets.
 * URL, username and password which is obtained via http://trec.nist.gov/data/tweets/ Pay attention to this section in the link:
 
 > Email the signed agreement, as a PDF file, to Angela Ellis <angela.ellis@nist.gov>. In the body of your email,
@@ -80,7 +82,7 @@ python trec.py 5
 
 ## Example Scenario
 
-You have 4 machine to download the corpus. So run the script in each machine with given ranges and than merge your jsonFiles folders. Use any number of machine like this scenario to download corpus with minimum amount of time.
+You have 4 machine to download the corpus. Or you can start 4 different command line in a single machine if you have good bandwith and processor. It will be faster than single connection. So run the script in each machine with given ranges and than merge your jsonFiles folders. Use any number of machine like this scenario to download corpus with minimum amount of time.
 
 ```
 python trec.py 0 3
