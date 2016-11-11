@@ -14,24 +14,38 @@ url = 'YOUR_URL_HERE'
 user, password = 'YOUR_USER_NAME_HERE', 'YOUR_PASSWORD_HERE'
 
 
+# path config, you can rename those if you wish
+currentFolder = os.path.dirname(os.path.realpath('__file__'))   
+tarFolder = 'tarFiles'
+untarFolder = 'openedTarFiles'
+jsonFolder = 'jsonFiles'
+logFolder = 'logFiles'
+repairJsonFolder = 'repairJsonFiles'
+
+
 # We wont use SSL since we trust the downloading page, so hide warnings
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # get tweets from the dat files which are opened from the tar files
-
-def openDatFiles(untarFolder, reverseDownload, begin, end):
+def getTweets(untarFolder, reverseDownload, begin, end):
 
     list = os.listdir(untarFolder)
+
+    # skip files that may be automatically added to folder like ".DS_STORE" in OS X
+    for file in list:
+        if "." in file:
+            list.remove(file)
+
     list.sort()
     if reverseDownload == True:
         list.reverse()
 
     if end > len(os.listdir(untarFolder)):
         end = len(os.listdir(untarFolder))
-        print("Entered bigger value than folder size, setting end point to maximum")
-    
-    for i in range(begin, end):
-    
+        print("Setting end point to maximum")
+
+    for i in range(begin, end+1):
+
         # dat file directory is in the same level with this script file, get its path
         datFolderPath = os.path.join(untarFolder, list[i])
     
@@ -46,8 +60,9 @@ def openDatFiles(untarFolder, reverseDownload, begin, end):
             jsonPath = makePath(jsonFolder, datFileName + ".json.gz")
             repairJsonPath = makePath(repairJsonFolder, datFileName + ".json.gz")
             datFilePath = makePath(datFolderPath, datFile)
+            fetcherPath = os.path.join("..", "target", "appassembler", "bin", "AsyncHTMLStatusBlockCrawler")
       
-            with subprocess.Popen(['sh', 'target/appassembler/bin/AsyncHTMLStatusBlockCrawler', '\\'
+            with subprocess.Popen(['sh', fetcherPath, '\\'
    ,'-data',datFilePath,'-output', jsonPath, '\\', '-repair', repairJsonPath], stdout=subprocess.PIPE) as proc:
                 path = makePath(logFolder,datFileName+".log")
                 print("logging to:" + path)
@@ -55,16 +70,18 @@ def openDatFiles(untarFolder, reverseDownload, begin, end):
                 logging.info(proc.stdout.read().decode('utf-8'))
     return
 
-# Repair
-def repairDatFiles(repairJsonFolder):
+# Repair failed tweets
+def repairTweets(repairJsonFolder):
     for repairFile in os.listdir(repairJsonFolder):
         repairFilePath = os.path.join(repairJsonFolder, repairFile)
         repairFile = os.path.splitext(repairFile)[0]
+        fetcherPath = os.path.join("..", "target", "appassembler", "bin", "AsyncHTMLStatusBlockCrawler")
+
         if os.path.isdir(repairFilePath) == True:
-            repairDatFiles(repairFilePath)
+            repairTweets(repairFilePath)
         else:
             repairFileName = makePath(jsonFolder, repairFile + ".repair.json.gz")
-            with subprocess.Popen(['sh', 'target/appassembler/bin/AsyncHTMLStatusBlockCrawler','\\'
+            with subprocess.Popen(['sh', fetcherPath ,'\\'
    ,'-data', repairFilePath, '-output', repairFileName], stdout=subprocess.PIPE) as proc:
                 path = makePath(logFolder, repairFile+".repair.log")
                 print("logging repair to:" + path)
@@ -96,23 +113,32 @@ def openGzFiles(files):
                 
 
 # Download retrieved files from the webpage
-
-def getFiles(files):
+def getFiles(files, begin, end):
     pathlist = []
-    for file in files:
-        downloadURL = url + str(file)
+
+    if end > len(files):
+        end = len(files)
+        print("Setting end point to maximum")
+
+    for i in range (begin, end+1):
+
+        # if files are already downloaded skip those
+        downloadedFiles = os.listdir(tarFolder)
+        if files[i] in downloadedFiles:
+            print(str(files[i]) + " is found in the path and will not be downloaded")
+            continue
+
+        downloadURL = os.path.join(url, str(files[i]))
         resp = requests.get(downloadURL, auth=(user, password), verify=False, stream=True)
         if (resp.status_code == 200):
             print(downloadURL + ' is being downloaded.')
-            path = makePath(tarFolder, str(file))
-            
+            path = makePath(tarFolder, str(files[i]))
             with open(path, 'wb') as file:
                 resp.raw.decode_content = True
                 shutil.copyfileobj(resp.raw, file)
-            
             pathlist.append(path)
         else:
-            print("Error while downloading " + downloadUrl + " code : " + str(resp.status_code))
+            print("Error while downloading " + downloadURL + " code : " + str(resp.status_code))
     return pathlist
 
 # Create new folder inside the scripts path and create new files in this new path
@@ -128,18 +154,16 @@ def makePath(folderName, fileName):
 
 
 # Download the tar file URLs from the parsed content
-
 def getFileLinks(resp):
     fileList = []
     html = BeautifulSoup(resp.content, 'html.parser')
+    print('Links are being added to download list.')
     for link in html.find_all('a'):
         if 'tar' in link.get('href'):
-        # print link, ' link has been found and added to download list.'
             fileList.append(link.get('href'))
     return fileList
 
-# Connect to the webpage to retrieve download links
-
+# Connect to the webpage and authenticate
 def connect(url, usr, pwd):
     resp = requests.get(url, auth=(user, password), verify=False)
     if(resp.status_code == 200): 
@@ -149,44 +173,42 @@ def connect(url, usr, pwd):
         print ('There is an error while connecting the site : ' + str(resp.status_code))
 
 
-
-currentFolder = os.path.dirname(os.path.realpath('__file__'))   
-tarFolder = 'tarFiles'
-untarFolder = 'openedTarFiles'
-jsonFolder = 'jsonFiles'
-logFolder = 'logFiles'
-repairJsonFolder = 'repairJsonFiles'
-
+# cmd config
 reverse = False
 numberOfFolders = None
 
-# let the fun begin
-resp = connect(url, user, password)
-tar = getFileLinks(resp)
-downloadedTar = getFiles(tar)
-openGzFiles(downloadedTar)
-
 temp = 0
+begin = 0
+end = sys.maxsize
 
 for arg in sys.argv:
     if arg != os.path.basename(__file__):
         if arg == "--reverse":
             reverse = True
         else:
-            print(arg)
             try:
                 number = int(arg)
             except ValueError:
                 print("Your input must be an integer for begin and end range")
             else:
-                if(number>0):
-                    if(number>temp):
+                # sort the numbers in increasing order, if user input is 5 2, set begin to 2 and end to 5
+                if(number >= 0):
+                    if(number > temp):
                         begin = temp
                         end = number
                         temp = end
                     else:
                         begin = number
+                        end = temp
+                        temp = end
                 else:
                     print("Please enter a positive integer")
-openDatFiles(untarFolder, reverse, begin, end)
-repairDatFiles(repairJsonFolder)
+
+# let the fun begin
+
+resp = connect(url, user, password)
+tar = getFileLinks(resp)
+downloadedTar = getFiles(tar, begin, end)
+openGzFiles(downloadedTar)
+getTweets(untarFolder, reverse, begin, end)
+repairTweets(repairJsonFolder)
