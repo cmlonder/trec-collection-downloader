@@ -13,8 +13,63 @@ http://trec.nist.gov/data/tweets/
 ## Prerequests
 
 * Python 3.5.*
-* Download https://github.com/lintool/twitter-tools to your local, lets call it PATH for your later usage in this guide. This is main tool to fetch the tweets.
-* URL, username and password which is obtained via http://trec.nist.gov/data/tweets/ Pay attention to this section in the link:
+* Download https://github.com/lintool/twitter-tools to your local. This is main tool to fetch the tweets. Installing steps of the tool is as decribed in its page:
+
+
+  * The main Maven artifact for the TREC Microblog API is `twitter-tools-core`. The latest releases of Maven artifacts are available at [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ccc.twittertools).
+
+  * You can clone the repo with the following command:
+
+    ```
+    $ git clone git://github.com/lintool/twitter-tools.git
+    ``` 
+
+  * Once you've cloned the repository, change directory into `twitter-tools-core` and build the package with Maven:
+
+    ```
+    $ cd twitter-tools-core
+    $ mvn clean package appassembler:assemble
+    ```
+
+  * For more information, see the [project wiki](https://github.com/lintool/twitter-tools/wiki).
+
+* Than clone this repo with the following command into the `twitter-tools-core` directory that you have cd into in previous step:
+
+  ```
+  https://github.com/cmlonder/trec-collection-downloader.git
+  ```
+
+* Install required libraries by running this command:
+
+  ```
+  pip3.5 install -r requirements.txt
+  ```
+
+Or if your default python version is 3.5 than you can run this command with using directly `pip` command instead of `pip3.5`
+
+  ```
+  pip install -r requirements.txt
+  ```
+
+* If you haven't pip installed (which is must be installed default when you install Python 3.5) than follow those steps:
+
+  * To install pip, securely download [get-pip.py](https://bootstrap.pypa.io/get-pip.py)
+
+  * Then run the following:
+
+    ```
+    python3.5 get-pip.py
+    ```
+
+  * or if your default python version is 3.5 you can run this command with using directly `python` instead of `python3.5`
+
+    ```
+    python get-pip.py
+    ```
+
+  * For the rest of the tutorial, it is assumed that your default python version is 3.5 and `python` command will be used in examples.
+
+* Get your URL, username and password via http://trec.nist.gov/data/tweets/ .Pay attention to this section in the link:
 
 > Email the signed agreement, as a PDF file, to Angela Ellis <angela.ellis@nist.gov>. In the body of your email,
 > Be clear that you are requesting the Tweets2011 dataset
@@ -47,8 +102,6 @@ Here is the folder structure which this script will create.
 url = 'YOUR_URL_HERE'
 user, password = 'YOUR_USER_NAME_HERE', 'YOUR_PASSWORD_HERE'
 ```
-
-2) move trec.py (this script) into PATH/twitter-tools-core  So new location of trec.py is PATH/twitter-tools-core/trec.py (PATH is the directory which is mentioned in the Prerequests section. Script will fetch the data by using tool is given here https://github.com/lintool/twitter-tools as mentioned earlier) 
 
 2) Run the script for default usage. This will fetch tweets(10.000 per .dat file) from each .dat file (100 per folder) from each folder (17 folder). This is not good scenario cause it will cost you +30 more days, but if you have acceptable time and connection go with this one.
 
