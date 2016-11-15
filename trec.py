@@ -13,6 +13,7 @@ import sys
 url = 'YOUR_URL_HERE'
 user, password = 'YOUR_USER_NAME_HERE', 'YOUR_PASSWORD_HERE'
 
+
 # path config, you can rename those if you wish
 currentFolder = os.path.dirname(os.path.realpath('__file__'))   
 tarFolder = 'tarFiles'
@@ -120,8 +121,8 @@ def getFiles(files, begin, end):
         print("Setting end point to maximum")
 
     for i in range (begin, end+1):
-        downloadedFiles = os.listdir(tarFolder)
         os.makedirs(os.path.dirname(tarFolder), exist_ok=True)
+        downloadedFiles = os.listdir(tarFolder)
         # if files are already downloaded skip those
         if files[i] in downloadedFiles:
             print(str(files[i]) + " is found in the path and will not be downloaded")
