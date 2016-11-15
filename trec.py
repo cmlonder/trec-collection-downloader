@@ -121,7 +121,7 @@ def getFiles(files, begin, end):
         print("Setting end point to maximum")
 
     for i in range (begin, end+1):
-
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         # if files are already downloaded skip those
         downloadedFiles = os.listdir(tarFolder)
         if files[i] in downloadedFiles:
