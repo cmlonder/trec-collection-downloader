@@ -13,7 +13,6 @@ import sys
 url = 'YOUR_URL_HERE'
 user, password = 'YOUR_USER_NAME_HERE', 'YOUR_PASSWORD_HERE'
 
-
 # path config, you can rename those if you wish
 currentFolder = os.path.dirname(os.path.realpath('__file__'))   
 tarFolder = 'tarFiles'
@@ -22,7 +21,7 @@ jsonFolder = 'jsonFiles'
 logFolder = 'logFiles'
 repairJsonFolder = 'repairJsonFiles'
 tweetsFolder = 'tweets'
-
+max = 17
 
 # We wont use SSL since we trust the downloading page, so hide warnings
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -41,18 +40,20 @@ def getTweets(untarFolder, begin, end):
     if reverse == True:
         list.reverse()
 
-    if end > len(os.listdir(untarFolder)):
-        end = len(os.listdir(untarFolder))
+    if end > max:
+        end = max
         print("Setting end point to maximum")
+    
 
-    for i in range(begin, end+1):
+    print(end-begin+1)
+    for i in range(0, end-begin):
 
         # dat file directory is in the same level with this script file, get its path
         datFolderPath = os.path.join(untarFolder, list[i])
     
         datFileList = os.listdir(datFolderPath)
         datFileList.sort()
-
+        print(datFileList)
         for datFile in datFileList:
             # remove dat extension
             datFileName = os.path.splitext(datFile)[0]
@@ -130,8 +131,8 @@ def getFiles(files, begin, end):
     if reverse == True:
         files.reverse()
 
-    if end > len(files):
-        end = len(files)
+    if end > max:
+        end = max
         print("Setting end point to maximum")
 
     for i in range (begin, end):
@@ -140,7 +141,9 @@ def getFiles(files, begin, end):
         downloadedFiles = os.listdir(tarFolder)
         # if files are already downloaded skip those
         if files[i] in downloadedFiles:
+            path = makePath(tarFolder, str(files[i]))
             print(str(files[i]) + " is found in the path and will not be downloaded")
+            pathlist.append(path)
             continue
 
         downloadURL = os.path.join(url, str(files[i]))
