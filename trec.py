@@ -21,13 +21,14 @@ untarFolder = 'openedTarFiles'
 jsonFolder = 'jsonFiles'
 logFolder = 'logFiles'
 repairJsonFolder = 'repairJsonFiles'
+tweetsFolder = 'tweets'
 
 
 # We wont use SSL since we trust the downloading page, so hide warnings
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # get tweets from the dat files which are opened from the tar files
-def getTweets(untarFolder, reverseDownload, begin, end):
+def getTweets(untarFolder, begin, end):
 
     list = os.listdir(untarFolder)
 
@@ -37,7 +38,7 @@ def getTweets(untarFolder, reverseDownload, begin, end):
             list.remove(file)
 
     list.sort()
-    if reverseDownload == True:
+    if reverse == True:
         list.reverse()
 
     if end > len(os.listdir(untarFolder)):
@@ -110,18 +111,32 @@ def openGzFiles(files):
                 print("opening .gz " + path)
                 datFolders.append(path)
     return
-                
+
+def openTweets():
+    os.makedirs(os.path.join(currentFolder,tweetsFolder), exist_ok=True)
+    dirName = os.path.join(currentFolder, jsonFolder)
+    for file in os.listdir(dirName):
+        path = makePath(tweetsFolder, file)
+        file = os.path.join(currentFolder, jsonFolder, file)
+        fileName = os.path.splitext(path)[0]
+        with gzip.open(file, 'rb') as file_in, open(fileName, 'wb') as file_out:
+            file_content = file_in.read()
+            file_out.write(file_content)
+            print("opening json.gz" + path)                
 
 # Download retrieved files from the webpage
 def getFiles(files, begin, end):
     pathlist = []
+    if reverse == True:
+        files.reverse()
 
     if end > len(files):
         end = len(files)
         print("Setting end point to maximum")
 
-    for i in range (begin, end+1):
-        os.makedirs(os.path.dirname(tarFolder), exist_ok=True)
+    for i in range (begin, end):
+        print(str(i) + " " + str(begin) + " " + str(end))
+        os.makedirs(os.path.join(currentFolder,tarFolder), exist_ok=True)
         downloadedFiles = os.listdir(tarFolder)
         # if files are already downloaded skip those
         if files[i] in downloadedFiles:
@@ -210,5 +225,7 @@ resp = connect(url, user, password)
 tar = getFileLinks(resp)
 downloadedTar = getFiles(tar, begin, end)
 openGzFiles(downloadedTar)
-getTweets(untarFolder, reverse, begin, end)
+getTweets(untarFolder, begin, end)
 repairTweets(repairJsonFolder)
+#openTweets()
+#openRepairTweets()
